@@ -1,5 +1,5 @@
 [package]
-name = "version-matching-tables"
+name = "bindiff"
 version = "0.1.0"
 authors = ["WatDuhHekBro <44940783+WatDuhHekBro@users.noreply.github.com>"]
 edition = "2018"
