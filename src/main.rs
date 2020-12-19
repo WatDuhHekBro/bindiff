@@ -5,7 +5,13 @@ use std::fs;
 mod util;
 
 fn main() {
-    let files = util::scan_paths_recursively(&util::get_cmd_dir());
+    let args = util::parse_args();
+    let mut files = Vec::new();
+
+    for dir in args.folders {
+        files.append(&mut util::scan_paths_recursively(&dir));
+    }
+
     // The keys must be unique but if there's a duplicate path, the string vector containing file names will be added to.
     let mut table: HashMap<Vec<u8>, Vec<String>> = HashMap::new();
     let progress = ProgressBar::new(files.len() as u64);
@@ -34,29 +40,33 @@ fn main() {
     progress.finish();
     println!("Finished comparing files.");
 
-    let progress = ProgressBar::new(table.len() as u64);
     let mut output = String::new();
+    let exclude_uniques = args.exclude_uniques;
 
     // Then write a file with all the results, basically each file name because the bytes themselves aren't what's important. Loop through the table's values and print out files that match.
     for (bytes, paths) in table {
-        // The file's "ID" will be a header of up to 8 bytes in hex.
-        let size = bytes.len();
+        if !exclude_uniques || (exclude_uniques && paths.len() >= 2) {
+            // The file's "ID" will be a header of up to 8 bytes in hex.
+            let size = bytes.len();
 
-        for i in 0..cmp::min(size, 8) {
-            output += &format!("{:0>2x}", bytes[i]); // Format u8 in lowercase hex padded with a zero (if needed).
+            for i in 0..cmp::min(size, 8) {
+                output += &format!("{:0>2x}", bytes[i]); // Format u8 in lowercase hex padded with a zero (if needed).
+            }
+
+            output += &format!(" (File Length: {})\n", size);
+
+            for path in paths {
+                output += &format!("- {}\n", path);
+            }
+
+            output += "\n";
         }
-
-        output += &format!(" (File Length: {})\n", size);
-
-        for path in paths {
-            output += &format!("- {}\n", path);
-        }
-
-        output += "\n";
-        progress.inc(1);
     }
 
-    progress.finish();
+    if output == "" {
+        output = String::from("No duplicate paths found.");
+    }
+
     fs::write("latest.log", output).expect("Unable to write file.");
     println!("Finished writing output to \"latest.log\".");
 }
