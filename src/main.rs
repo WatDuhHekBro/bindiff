@@ -1,11 +1,12 @@
 use indicatif::ProgressBar;
 use std::cmp;
 use std::collections::HashMap;
+use std::env;
 use std::fs;
 mod util;
 
 fn main() {
-    let args = util::parse_args();
+    let args = parse_args();
     let mut files = Vec::new();
 
     for dir in args.folders {
@@ -74,4 +75,38 @@ fn main() {
 
     fs::write("latest.log", output).expect("Unable to write file.");
     println!("Finished writing output to \"latest.log\".");
+}
+
+struct Arguments {
+    pub folders: Vec<String>,
+    pub exclude_uniques: bool,
+}
+
+fn parse_args() -> Arguments {
+    let mut command_line_args: Vec<String> = env::args().collect();
+    let mut folders = Vec::new();
+    let mut exclude_uniques = false;
+
+    // The first argument will usually, but not always, be the invocation path. It serves no purpose here.
+    command_line_args.drain(0..1);
+
+    for argument in command_line_args {
+        // "-" marks the start of a flag
+        if argument.starts_with("-") {
+            if argument == "-e" {
+                exclude_uniques = true;
+            }
+        } else {
+            folders.push(argument);
+        }
+    }
+
+    if folders.len() == 0 {
+        folders.push(String::from("."));
+    }
+
+    return Arguments {
+        folders: folders,
+        exclude_uniques: exclude_uniques,
+    };
 }
