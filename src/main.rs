@@ -48,9 +48,14 @@ fn main() {
         if !exclude_uniques || (exclude_uniques && paths.len() >= 2) {
             // The file's "ID" will be a header of up to 8 bytes in hex.
             let size = bytes.len();
+            let cutoff_point = cmp::min(size, 8); // Where to stop indexing bytes and just add 0x00 padding
 
-            for i in 0..cmp::min(size, 8) {
+            for i in 0..cutoff_point {
                 output += &format!("{:0>2x}", bytes[i]); // Format u8 in lowercase hex padded with a zero (if needed).
+            }
+
+            for _ in cutoff_point..8 {
+                output += "00";
             }
 
             output += &format!(" (File Length: {})\n", size);
