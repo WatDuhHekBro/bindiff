@@ -6,10 +6,13 @@ use std::fs;
 mod util;
 
 fn main() {
-    let args = parse_args();
+    let Arguments {
+        folders,
+        exclude_uniques,
+    } = parse_args();
     let mut files = Vec::new();
 
-    for dir in args.folders {
+    for dir in folders {
         files.append(&mut util::scan_paths_recursively(&dir));
     }
 
@@ -42,17 +45,17 @@ fn main() {
     println!("Finished comparing files.");
 
     let mut output = String::new();
-    let exclude_uniques = args.exclude_uniques;
 
     // Then write a file with all the results, basically each file name because the bytes themselves aren't what's important. Loop through the table's values and print out files that match.
     for (bytes, paths) in table {
-        if !exclude_uniques || (exclude_uniques && paths.len() >= 2) {
+        // As long as the exclude_uniques flag isn't enabled (or if it is, as long as the current entry has 2 or more paths (duplicate)), then print that entry.
+        if !(exclude_uniques && paths.len() < 2) {
             // The file's "ID" will be a header of up to 8 bytes in hex.
             let size = bytes.len();
             let cutoff_point = cmp::min(size, 8); // Where to stop indexing bytes and just add 0x00 padding
 
-            for i in 0..cutoff_point {
-                output += &format!("{:0>2x}", bytes[i]); // Format u8 in lowercase hex padded with a zero (if needed).
+            for byte in bytes.iter().take(cutoff_point) {
+                output += &format!("{:0>2x}", byte); // Format u8 in lowercase hex padded with a zero (if needed).
             }
 
             for _ in cutoff_point..8 {
@@ -92,7 +95,7 @@ fn parse_args() -> Arguments {
 
     for argument in command_line_args {
         // "-" marks the start of a flag
-        if argument.starts_with("-") {
+        if argument.starts_with('.') {
             if argument == "-e" {
                 exclude_uniques = true;
             }
@@ -101,12 +104,12 @@ fn parse_args() -> Arguments {
         }
     }
 
-    if folders.len() == 0 {
+    if folders.is_empty() {
         folders.push(String::from("."));
     }
 
-    return Arguments {
-        folders: folders,
-        exclude_uniques: exclude_uniques,
-    };
+    Arguments {
+        folders,
+        exclude_uniques,
+    }
 }

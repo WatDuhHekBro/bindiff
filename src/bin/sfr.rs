@@ -6,12 +6,15 @@ use std::path::Path;
 
 // sfr = Search Filenames Recursively (using regex)
 fn main() {
-    let args = parse_args();
+    let Arguments {
+        pattern,
+        folders,
+        include_directories,
+    } = parse_args();
     let mut files = Vec::new();
-    let pattern = Regex::new(&args.pattern).expect("The regex pattern you entered is invalid.");
-    let include_directories = args.include_directories;
+    let pattern = Regex::new(&pattern).expect("The regex pattern you entered is invalid.");
 
-    for dir in args.folders {
+    for dir in folders {
         files.append(&mut util::scan_paths_recursively(&dir));
     }
 
@@ -73,26 +76,26 @@ fn parse_args() -> Arguments {
 
     for argument in command_line_args {
         // "-" marks the start of a flag
-        if argument.starts_with("-") {
+        if argument.starts_with('-') {
             if argument == "-d" {
                 include_directories = true;
             }
         }
         // This should only run once, assuming the user enters a valid pattern.
         else if pattern == "" {
-            pattern = String::from(argument);
+            pattern = argument;
         } else {
             folders.push(argument);
         }
     }
 
-    if folders.len() == 0 {
+    if folders.is_empty() {
         folders.push(String::from("."));
     }
 
-    return Arguments {
-        pattern: pattern,
-        folders: folders,
-        include_directories: include_directories,
-    };
+    Arguments {
+        pattern,
+        folders,
+        include_directories,
+    }
 }

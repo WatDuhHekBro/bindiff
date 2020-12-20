@@ -3,7 +3,7 @@ use std::fs;
 // Scan a directory recursively and return all the paths.
 pub fn scan_paths_recursively(dir: &str) -> Vec<String> {
     let mut list = Vec::new();
-    let searches_root = String::from(dir).starts_with(".");
+    let searches_root = String::from(dir).starts_with('.');
 
     match fs::read_dir(dir) {
         Ok(dir) => {
@@ -34,5 +34,5 @@ pub fn scan_paths_recursively(dir: &str) -> Vec<String> {
         Err(_msg) => println!("Could not successfully read the directory \"{}\"!", dir),
     }
 
-    return list;
+    list
 }
