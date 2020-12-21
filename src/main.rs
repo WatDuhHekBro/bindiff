@@ -95,9 +95,11 @@ fn parse_args() -> Arguments {
 
     for argument in command_line_args {
         // "-" marks the start of a flag
-        if argument.starts_with('.') {
-            if argument == "-e" {
+        if let Some(flag) = argument.strip_prefix('-') {
+            if flag == "e" {
                 exclude_uniques = true;
+            } else {
+                println!("[WARNING] Unknown flag: {}", flag);
             }
         } else {
             folders.push(argument);

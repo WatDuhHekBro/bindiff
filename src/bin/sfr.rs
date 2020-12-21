@@ -21,14 +21,26 @@ fn main() {
     for path in files {
         // Nothing needs to be done here because the paths already have directories.
         if include_directories {
-            print_file_match(&path, &pattern, &path);
+            print_file_match(&path, &pattern, 0);
         }
-        // Otherwise, remove the leading directories (default).
+        // Otherwise, get the last index (because the filename might repeat twice) of when the file name without leading directories starts.
         else {
+            // I feel like there has to be a better way to clean up this mess. ¯\_(ツ)_/¯
             match Path::new(&path).file_name() {
                 Some(filename) => match filename.to_str() {
                     Some(filename) => {
-                        print_file_match(filename, &pattern, &path);
+                        // There's no reason an index shouldn't be found. "filename" is some chunk of "path".
+                        match path.rfind(filename) {
+                            Some(index) => {
+                                print_file_match(&path, &pattern, index);
+                            }
+                            None => {
+                                panic!(
+                                    "Index of filename {} not found in path {}?!",
+                                    filename, path
+                                );
+                            }
+                        }
                     }
                     None => {
                         println!("Invalid filename: {:?}", filename);
@@ -43,7 +55,10 @@ fn main() {
 }
 
 // Prints the path (the directories should be filtered out by this point) if a match is found and where it was found.
-fn print_file_match(text: &str, pattern: &Regex, full_path: &str) {
+fn print_file_match(path: &str, pattern: &Regex, cutoff_index: usize) {
+    let leading_text = &path[..cutoff_index];
+    let text = &path[cutoff_index..];
+
     // A path without a match will be ignored.
     if let Some(m) = pattern.find(text) {
         let start = m.start();
@@ -52,10 +67,10 @@ fn print_file_match(text: &str, pattern: &Regex, full_path: &str) {
         let highlighted = &text[start..end];
         let after = &text[end..text.len()];
 
-        dark_cyan!("{}\n", full_path); // full path to file
+        dark_grey!("{}", leading_text); // the part of the path leading up to the selection (none if the entire path is selected, aka if cutoff_index = 0)
         print!("{}", before);
         red!(highlighted); // highlighted section matching the rule (of just the file name)
-        print!("{}\n\n", after);
+        println!("{}", after);
     }
 }
 
@@ -76,9 +91,11 @@ fn parse_args() -> Arguments {
 
     for argument in command_line_args {
         // "-" marks the start of a flag
-        if argument.starts_with('-') {
-            if argument == "-d" {
+        if let Some(flag) = argument.strip_prefix('-') {
+            if flag == "d" {
                 include_directories = true;
+            } else {
+                println!("[WARNING] Unknown flag: {}", flag);
             }
         }
         // This should only run once, assuming the user enters a valid pattern.
