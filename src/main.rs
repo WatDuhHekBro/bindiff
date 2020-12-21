@@ -1,3 +1,4 @@
+use clap::{App, Arg};
 use indicatif::ProgressBar;
 use std::cmp;
 use std::collections::HashMap;
@@ -6,10 +7,37 @@ use std::fs;
 mod util;
 
 fn main() {
-    let Arguments {
-        folders,
-        exclude_uniques,
-    } = parse_args();
+    // This has to be a set to a variable first so that it lives long enough for clap's interpreter.
+    let output_file = format!("bindiff-{}.log", util::get_current_timestamp());
+    let matches = App::new(env!("CARGO_PKG_NAME"))
+        .version(env!("CARGO_PKG_VERSION"))
+        .author(env!("CARGO_PKG_AUTHORS"))
+        .about(env!("CARGO_PKG_DESCRIPTION"))
+        .arg(
+            Arg::with_name("folders")
+            .multiple(true)
+            .default_value(".")
+            .help("The folder(s) you want to scan.")
+        )
+        .arg(
+            Arg::with_name("exclude_uniques")
+            .short("e")
+            .long("exclude-uniques")
+            .help("Exclude unique files, only show files with two or more associated paths.")
+        )
+        .arg(
+            Arg::with_name("write_to_log")
+            .short("l")
+            .long("log")
+            .help("Writes all output to a file instead. Optionally, the log file can be specified.")
+            .takes_value(true)
+            .default_value(&output_file)
+        )
+        .get_matches();
+
+    let folders = matches.values_of("folders").unwrap();
+    let exclude_uniques = matches.is_present("exclude_uniques");
+    let output_file = matches.value_of("write_to_log").unwrap();
     let mut files = Vec::new();
 
     for dir in folders {
@@ -76,19 +104,23 @@ fn main() {
         output = String::from("No duplicate paths found.");
     }
 
-    fs::write("latest.log", output).expect("Unable to write file.");
-    println!("Finished writing output to \"latest.log\".");
+    fs::write(output_file, output).expect("Unable to write file.");
+    println!("Finished writing output to \"{}\".", output_file);
 }
 
-struct Arguments {
+/*struct Arguments {
     pub folders: Vec<String>,
     pub exclude_uniques: bool,
+    pub write_to_log: bool
 }
 
 fn parse_args() -> Arguments {
     let mut command_line_args: Vec<String> = env::args().collect();
-    let mut folders = Vec::new();
-    let mut exclude_uniques = false;
+    let mut control = Arguments {
+        folders: Vec::new(),
+        exclude_uniques: false,
+        write_to_log: false
+    };
 
     // The first argument will usually, but not always, be the invocation path. It serves no purpose here.
     command_line_args.drain(0..1);
@@ -96,22 +128,25 @@ fn parse_args() -> Arguments {
     for argument in command_line_args {
         // "-" marks the start of a flag
         if let Some(flag) = argument.strip_prefix('-') {
-            if flag == "e" {
-                exclude_uniques = true;
-            } else {
-                println!("[WARNING] Unknown flag: {}", flag);
+            match flag {
+                "e" => {
+                    control.exclude_uniques = true;
+                }
+                "l" => {
+                    control.write_to_log = true;
+                }
+                _ => {
+                    println!("[WARNING] Unknown flag: {}", flag);
+                }
             }
         } else {
-            folders.push(argument);
+            control.folders.push(argument);
         }
     }
 
-    if folders.is_empty() {
-        folders.push(String::from("."));
+    if control.folders.is_empty() {
+        control.folders.push(String::from("."));
     }
 
-    Arguments {
-        folders,
-        exclude_uniques,
-    }
-}
+    control
+}*/

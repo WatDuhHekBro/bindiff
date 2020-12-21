@@ -1,16 +1,58 @@
 use bindiff::util;
+use clap::{App, Arg};
 use crossterm::style::Colorize;
 use regex::Regex;
 use std::env;
 use std::path::Path;
 
-// sfr = Search Filenames Recursively (using regex)
+// sfr = Search File Names Recursively (using regex)
 fn main() {
-    let Arguments {
+    // This has to be a set to a variable first so that it lives long enough for clap's interpreter.
+    let output_file = format!("sfr-{}.log", util::get_current_timestamp());
+    let matches = App::new("sfr")
+        .version(env!("CARGO_PKG_VERSION"))
+        .author(env!("CARGO_PKG_AUTHORS"))
+        .about(env!("CARGO_PKG_DESCRIPTION"))
+        .arg(
+            Arg::with_name("pattern")
+            .index(1)
+            .default_value("")
+            .help("The regex pattern to use when scanning file names.")
+        )
+        .arg(
+            Arg::with_name("folders")
+            .index(2)
+            .multiple(true)
+            .default_value(".")
+            .help("The folders you want to scan.")
+        )
+        .arg(Arg::with_name("include_directories")
+            .short("f")
+            .long("full-path")
+            .help("This includes any leading directories into the path so the regex pattern can take that into account.")
+        )
+        .arg(
+            Arg::with_name("write_to_log")
+            .short("l")
+            .long("log")
+            .help("Writes all output to a file instead. Optionally, the log file can be specified.")
+            .takes_value(true)
+            .default_value(&output_file)
+        )
+        .get_matches();
+
+    let pattern = matches.value_of("pattern").unwrap();
+    let folders = matches.values_of("folders").unwrap();
+    let include_directories = matches.is_present("include_directories");
+    let _output_file = matches.value_of("write_to_log").unwrap();
+
+    /*let Arguments {
         pattern,
         folders,
         include_directories,
-    } = parse_args();
+        write_to_log,
+    } = parse_args();*/
+
     let mut files = Vec::new();
     let pattern = Regex::new(&pattern).expect("The regex pattern you entered is invalid.");
 
@@ -77,17 +119,21 @@ fn print_file_match(path: &str, pattern: &Regex, cutoff_index: usize) {
     }
 }
 
-struct Arguments {
+/*struct Arguments {
     pub pattern: String,
     pub folders: Vec<String>,
     pub include_directories: bool,
+    pub write_to_log: bool,
 }
 
 fn parse_args() -> Arguments {
     let mut command_line_args: Vec<String> = env::args().collect();
-    let mut pattern = String::new();
-    let mut folders = Vec::new();
-    let mut include_directories = false;
+    let mut control = Arguments {
+        pattern: String::new(),
+        folders: Vec::new(),
+        include_directories: false,
+        write_to_log: false,
+    };
 
     // The first argument will usually, but not always, be the invocation path. It serves no purpose here.
     command_line_args.drain(0..1);
@@ -95,27 +141,29 @@ fn parse_args() -> Arguments {
     for argument in command_line_args {
         // "-" marks the start of a flag
         if let Some(flag) = argument.strip_prefix('-') {
-            if flag == "d" {
-                include_directories = true;
-            } else {
-                println!("[WARNING] Unknown flag: {}", flag);
+            match flag {
+                "d" => {
+                    control.include_directories = true;
+                }
+                "l" => {
+                    control.write_to_log = true;
+                }
+                _ => {
+                    println!("[WARNING] Unknown flag: {}", flag);
+                }
             }
         }
         // This should only run once, assuming the user enters a valid pattern.
-        else if pattern == "" {
-            pattern = argument;
+        else if control.pattern == "" {
+            control.pattern = argument;
         } else {
-            folders.push(argument);
+            control.folders.push(argument);
         }
     }
 
-    if folders.is_empty() {
-        folders.push(String::from("."));
+    if control.folders.is_empty() {
+        control.folders.push(String::from("."));
     }
 
-    Arguments {
-        pattern,
-        folders,
-        include_directories,
-    }
-}
+    control
+}*/

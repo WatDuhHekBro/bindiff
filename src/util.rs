@@ -1,4 +1,5 @@
 use std::fs;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 // Scan a directory recursively and return all the paths.
 pub fn scan_paths_recursively(dir: &str) -> Vec<String> {
@@ -31,8 +32,16 @@ pub fn scan_paths_recursively(dir: &str) -> Vec<String> {
                 }
             }
         }
-        Err(_msg) => println!("Could not successfully read the directory \"{}\"!", dir),
+        Err(_) => println!("Could not successfully read the directory \"{}\"!", dir),
     }
 
     list
+}
+
+// Give the log file a unique identifier based on the current system time (precision up to seconds).
+pub fn get_current_timestamp() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs()
 }
