@@ -1,5 +1,5 @@
 use bindiff::util;
-use colour::*;
+use crossterm::style::Colorize;
 use regex::Regex;
 use std::env;
 use std::path::Path;
@@ -56,7 +56,7 @@ fn main() {
 
 // Prints the path (the directories should be filtered out by this point) if a match is found and where it was found.
 fn print_file_match(path: &str, pattern: &Regex, cutoff_index: usize) {
-    let leading_text = &path[..cutoff_index];
+    let leading_text = &path[..cutoff_index]; // the part of the path leading up to the selection (none if the entire path is selected, aka if cutoff_index = 0)
     let text = &path[cutoff_index..];
 
     // A path without a match will be ignored.
@@ -64,13 +64,16 @@ fn print_file_match(path: &str, pattern: &Regex, cutoff_index: usize) {
         let start = m.start();
         let end = m.end();
         let before = &text[0..start];
-        let highlighted = &text[start..end];
+        let highlighted = &text[start..end]; // highlighted section matching the rule (of just the file name)
         let after = &text[end..text.len()];
 
-        dark_grey!("{}", leading_text); // the part of the path leading up to the selection (none if the entire path is selected, aka if cutoff_index = 0)
-        print!("{}", before);
-        red!(highlighted); // highlighted section matching the rule (of just the file name)
-        println!("{}", after);
+        println!(
+            "{}{}{}{}",
+            leading_text.dark_grey(),
+            before,
+            highlighted.red(),
+            after
+        );
     }
 }
 
