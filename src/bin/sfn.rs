@@ -5,11 +5,11 @@ use regex::Regex;
 use std::env;
 use std::path::Path;
 
-// sfr = Search File Names Recursively (using regex)
+// sfn = Search File Names Recursively (using regex)
 fn main() {
     // This has to be a set to a variable first so that it lives long enough for clap's interpreter.
-    let output_file = format!("sfr-{}.log", util::get_current_timestamp());
-    let matches = App::new("sfr")
+    let output_file = format!("sfn-{}.log", util::get_current_timestamp());
+    let matches = App::new("sfn")
         .version(env!("CARGO_PKG_VERSION"))
         .author(env!("CARGO_PKG_AUTHORS"))
         .about(env!("CARGO_PKG_DESCRIPTION"))
@@ -45,14 +45,6 @@ fn main() {
     let folders = matches.values_of("folders").unwrap();
     let include_directories = matches.is_present("include_directories");
     let _output_file = matches.value_of("write_to_log").unwrap();
-
-    /*let Arguments {
-        pattern,
-        folders,
-        include_directories,
-        write_to_log,
-    } = parse_args();*/
-
     let mut files = Vec::new();
     let pattern = Regex::new(&pattern).expect("The regex pattern you entered is invalid.");
 
@@ -118,52 +110,3 @@ fn print_file_match(path: &str, pattern: &Regex, cutoff_index: usize) {
         );
     }
 }
-
-/*struct Arguments {
-    pub pattern: String,
-    pub folders: Vec<String>,
-    pub include_directories: bool,
-    pub write_to_log: bool,
-}
-
-fn parse_args() -> Arguments {
-    let mut command_line_args: Vec<String> = env::args().collect();
-    let mut control = Arguments {
-        pattern: String::new(),
-        folders: Vec::new(),
-        include_directories: false,
-        write_to_log: false,
-    };
-
-    // The first argument will usually, but not always, be the invocation path. It serves no purpose here.
-    command_line_args.drain(0..1);
-
-    for argument in command_line_args {
-        // "-" marks the start of a flag
-        if let Some(flag) = argument.strip_prefix('-') {
-            match flag {
-                "d" => {
-                    control.include_directories = true;
-                }
-                "l" => {
-                    control.write_to_log = true;
-                }
-                _ => {
-                    println!("[WARNING] Unknown flag: {}", flag);
-                }
-            }
-        }
-        // This should only run once, assuming the user enters a valid pattern.
-        else if control.pattern == "" {
-            control.pattern = argument;
-        } else {
-            control.folders.push(argument);
-        }
-    }
-
-    if control.folders.is_empty() {
-        control.folders.push(String::from("."));
-    }
-
-    control
-}*/

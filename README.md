@@ -11,17 +11,17 @@ bindiff (from **bin**ary **diff**erences) is a lightweight command line tool tha
 - Scan for byte differences between two updates/versions of a game.
 - Check for any actual differences in the bytes if you feel like you're seeing the same file over and over again (without having to compare files individually in a hex editor/viewer).
 
-# sfr
-`sfr` (from **S**can **F**ilenames **R**ecursively) uses the same recursive path scan function to search for filenames matching a regex pattern.
+# sfn
+`sfn` (from **s**can **f**ile **n**ames recursively) uses the same recursive path scan function to search for filenames matching a regex pattern.
 
 ## Usage
-- `sfr "<regex pattern>"` - This will scan all the paths starting in your current directory.
-- `sfr -f "<regex pattern>"` - This includes any leading directories into the path so the regex pattern can take that into account. Useful if you're searching for a folder by its name.
-- `sfr "<regex pattern>" <"some folder name"...>` - This will scan paths starting in folders you select.
-- `sfr` or `sfr -f ""` - Definitely not as intentional but this will list out all files and their paths.
-- `sfr -l (<log file>) ...` - Same as above (see bindiff usage).
+- `sfn "<regex pattern>"` - This will scan all the paths starting in your current directory.
+- `sfn -f "<regex pattern>"` - This includes any leading directories into the path so the regex pattern can take that into account. Useful if you're searching for a folder by its name.
+- `sfn "<regex pattern>" <"some folder name"...>` - This will scan paths starting in folders you select.
+- `sfn` or `sfn -f ""` - Definitely not as intentional but this will list out all files and their paths.
+- `sfn -l (<log file>) ...` - Same as above (see bindiff usage).
 
 ## Use Cases
 - This can help you locate a file nested in a bunch of folders if you know its name.
 - You can also search for a set of files matching a particular rule (or file extension) by using regular expressions.
-	- For Example: To search for all files with a file extension of `mp4` for example, you'd do `sfr ".+?\.mp4"` or some other variant of that.
+    - For Example: To search for all files with a file extension of `mp4` for example, you'd do `sfn ".+?\.mp4"` or some other variant of that.
