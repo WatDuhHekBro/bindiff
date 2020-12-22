@@ -1,8 +1,17 @@
 use std::fs;
+use std::io::{Stdout, Write};
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use crossterm::{
+    QueueableCommand,
+    {
+        cursor,
+        terminal::{self, ClearType},
+    },
+};
+
 // Scan a directory recursively and return all the paths.
-pub fn scan_paths_recursively(dir: &str) -> Vec<String> {
+pub fn scan_paths_recursively(dir: &str, stdout: &mut Stdout) -> Vec<String> {
     let mut list = Vec::new();
     let searches_root = String::from(dir).starts_with('.');
 
@@ -15,9 +24,10 @@ pub fn scan_paths_recursively(dir: &str) -> Vec<String> {
                 let path = path.to_str().unwrap();
 
                 if is_dir {
-                    let submap = scan_paths_recursively(path);
+                    let submap = scan_paths_recursively(path, stdout);
 
                     for subpath in submap {
+                        update_status(stdout, &format!("Currently Scanning: {}", subpath));
                         list.push(subpath);
                     }
                 } else {
@@ -28,6 +38,7 @@ pub fn scan_paths_recursively(dir: &str) -> Vec<String> {
                         workable_path.drain(..2);
                     }
 
+                    update_status(stdout, &format!("Currently Scanning: {}", workable_path));
                     list.push(workable_path);
                 }
             }
@@ -44,4 +55,21 @@ pub fn get_current_timestamp() -> u64 {
         .duration_since(UNIX_EPOCH)
         .unwrap()
         .as_secs()
+}
+
+// In order for this to work, all output MUST go through this output stream and not through print! or println!
+pub fn update_status(stdout: &mut Stdout, message: &str) {
+    stdout.queue(cursor::SavePosition).unwrap();
+    // I will note that it will break if the file name is long enough to go to the next line. Can't think of a fix unfortunately.
+    stdout
+        .queue(terminal::Clear(ClearType::CurrentLine))
+        .unwrap();
+    stdout.write_all(message.as_bytes()).unwrap();
+    stdout.queue(cursor::RestorePosition).unwrap();
+    stdout.flush().unwrap();
+}
+
+// A dedicated function to return the console back to normal and relinquish ownership of stdout.
+pub fn finish_status(mut stdout: Stdout, message: &str) {
+    update_status(&mut stdout, &format!("{}\n", message));
 }

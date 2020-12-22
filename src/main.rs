@@ -2,6 +2,7 @@ use std::cmp;
 use std::collections::HashMap;
 use std::env;
 use std::fs;
+use std::io::stdout;
 
 use clap::{App, Arg};
 use crossterm::style::Colorize;
@@ -48,10 +49,13 @@ fn main() {
     let writes_to_log_file =
         matches.is_present("writes_to_log_file") || matches.is_present("output_file");
     let mut files = Vec::new();
+    let mut stdout = stdout();
 
     for dir in folders {
-        files.append(&mut util::scan_paths_recursively(&dir));
+        files.append(&mut util::scan_paths_recursively(&dir, &mut stdout));
     }
+
+    util::finish_status(stdout, "Finished gathering paths.");
 
     // The keys must be unique but if there's a duplicate path, the string vector containing file names will be added to.
     let mut table: HashMap<Vec<u8>, Vec<String>> = HashMap::new();

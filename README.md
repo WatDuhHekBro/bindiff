@@ -10,6 +10,7 @@ bindiff (from **bin**ary **diff**erences) is a lightweight command line tool tha
 ## Use Cases
 - Scan for byte differences between two updates/versions of a game.
 - Check for any actual differences in the bytes if you feel like you're seeing the same file over and over again (without having to compare files individually in a hex editor/viewer).
+- Make sure that a copy (of a repository for example) really is an exact copy so you aren't deleting data that's actually different.
 
 # sfn
 `sfn` (from **s**can **f**ile **n**ames) uses the same recursive path scan function to search for filenames matching a regex pattern.
@@ -18,7 +19,6 @@ bindiff (from **bin**ary **diff**erences) is a lightweight command line tool tha
 - `sfn "<regex pattern>"` - This will scan all the paths starting in your current directory.
 - `sfn -f "<regex pattern>"` - This includes any leading directories into the path so the regex pattern can take that into account. Useful if you're searching for a folder by its name.
 - `sfn "<regex pattern>" <"some folder name"...>` - This will scan paths starting in folders you select.
-- `sfn` or `sfn ""` - Definitely not as intentional but this will list out all files and their paths.
 - `sfn -l ...` or `sfn -o <log file> ...` - Same as above (see `bindiff` usage).
 
 ## Use Cases

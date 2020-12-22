@@ -1,5 +1,6 @@
 use std::env;
 use std::fs;
+use std::io::stdout;
 use std::path::Path;
 
 use clap::{App, Arg};
@@ -19,7 +20,7 @@ fn main() {
         .arg(
             Arg::with_name("pattern")
                 .index(1)
-                .default_value("")
+                .required(true)
                 .help("The regex pattern to use when scanning file names.")
         )
         .arg(
@@ -57,10 +58,13 @@ fn main() {
     let mut files = Vec::new();
     let pattern = Regex::new(&pattern).expect("The regex pattern you entered is invalid.");
     let mut output = String::new();
+    let mut stdout = stdout();
 
     for dir in folders {
-        files.append(&mut util::scan_paths_recursively(&dir));
+        files.append(&mut util::scan_paths_recursively(&dir, &mut stdout));
     }
+
+    util::finish_status(stdout, "Finished gathering paths.");
 
     for path in files {
         let leading_text; // The part of the path leading up to the selection (none if the entire path is selected, aka if cutoff_index = 0)
