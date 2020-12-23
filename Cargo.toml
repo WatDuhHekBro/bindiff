@@ -1,6 +1,6 @@
 [package]
 name = "bindiff"
-version = "0.3.1"
+version = "0.3.2"
 authors = ["WatDuhHekBro <44940783+WatDuhHekBro@users.noreply.github.com>"]
 edition = "2018"
 description = "Some command line tools for various purposes."

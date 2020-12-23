@@ -6,7 +6,7 @@ use crossterm::{
     QueueableCommand,
     {
         cursor,
-        terminal::{self, ClearType},
+        terminal::{self, size, ClearType},
     },
 };
 
@@ -27,7 +27,7 @@ pub fn scan_paths_recursively(dir: &str, stdout: &mut Stdout) -> Vec<String> {
                     let submap = scan_paths_recursively(path, stdout);
 
                     for subpath in submap {
-                        update_status(stdout, &format!("Currently Scanning: {}", subpath));
+                        update_status(stdout, format!("Currently Scanning: {}", subpath));
                         list.push(subpath);
                     }
                 } else {
@@ -38,7 +38,7 @@ pub fn scan_paths_recursively(dir: &str, stdout: &mut Stdout) -> Vec<String> {
                         workable_path.drain(..2);
                     }
 
-                    update_status(stdout, &format!("Currently Scanning: {}", workable_path));
+                    update_status(stdout, format!("Currently Scanning: {}", workable_path));
                     list.push(workable_path);
                 }
             }
@@ -58,7 +58,19 @@ pub fn get_current_timestamp() -> u64 {
 }
 
 // In order for this to work, all output MUST go through this output stream and not through print! or println!
-pub fn update_status(stdout: &mut Stdout, message: &str) {
+// Note: This function completely breaks when lots of long file names are involved, so it'll cap out a string based on the terminal's width.
+pub fn update_status(stdout: &mut Stdout, mut message: String) {
+    // It could be useful to calculate this each time because the user might resize their terminal while it's searching through the paths.
+    let max_length = size().expect("No terminal active?!").0 as usize;
+
+    // If the message exceeds the terminal's width, turn the last 3 characters into "..." to let the user know that it continues on.
+    // This will throw an out of bounds error if the terminal is less than 3 characters for whatever reason.
+    // But at that point, you have a lot more things to worry about than just the program crashing.
+    if message.len() > max_length {
+        message.drain(max_length - 3..);
+        message.push_str("...");
+    }
+
     stdout.queue(cursor::SavePosition).unwrap();
     // I will note that it will break if the file name is long enough to go to the next line. Can't think of a fix unfortunately.
     stdout
@@ -71,5 +83,6 @@ pub fn update_status(stdout: &mut Stdout, message: &str) {
 
 // A dedicated function to return the console back to normal and relinquish ownership of stdout.
 pub fn finish_status(mut stdout: Stdout, message: &str) {
-    update_status(&mut stdout, &format!("{}\n", message));
+    update_status(&mut stdout, String::from(message));
+    println!(); // This is a separate step to make sure that output afterwards doesn't try overwriting the line (in case the queue doesn't finish fast enough).
 }

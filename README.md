@@ -25,3 +25,13 @@ bindiff (from **bin**ary **diff**erences) is a lightweight command line tool tha
 - This can help you locate a file nested in a bunch of folders if you know its name.
 - You can also search for a set of files matching a particular rule (or file extension) by using regular expressions.
     - For Example: To search for all files with a file extension of `mp4` for example, you'd do `sfn ".+?\.mp4"` or some other variant of that.
+
+# For Mac Users
+Sorry, you'll have to compile to program yourself! You'd get bombarded with unidentified developer warnings otherwise which is probably more annoying than the build process itself, but hey, the source is right here.
+
+Steps to Compile:
+1. Go install [Rust](https://www.rust-lang.org/learn/get-started) and follow its instructions there.
+2. Clone this repository or download its source.
+3. Open your terminal and go to wherever you downloaded it. Make sure you're inside the folder where `Cargo.toml` is.
+4. Build a release version by doing `cargo build --release`.
+5. The executables will located at `target/release/bindiff` and `target/release/sfn`. You do not need the additional files that come with those.
