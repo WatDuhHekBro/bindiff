@@ -12,20 +12,6 @@ bindiff (from **bin**ary **diff**erences) is a lightweight command line tool tha
 - Check for any actual differences in the bytes if you feel like you're seeing the same file over and over again (without having to compare files individually in a hex editor/viewer).
 - Make sure that a copy (of a repository for example) really is an exact copy so you aren't deleting data that's actually different.
 
-# sfn
-`sfn` (from **s**can **f**ile **n**ames) uses the same recursive path scan function to search for filenames matching a regex pattern.
-
-## Usage
-- `sfn "<regex pattern>"` - This will scan all the paths starting in your current directory.
-- `sfn -f "<regex pattern>"` - This includes any leading directories into the path so the regex pattern can take that into account. Useful if you're searching for a folder by its name.
-- `sfn "<regex pattern>" <"some folder name"...>` - This will scan paths starting in folders you select.
-- `sfn -l ...` or `sfn -o <log file> ...` - Same as above (see `bindiff` usage).
-
-## Use Cases
-- This can help you locate a file nested in a bunch of folders if you know its name.
-- You can also search for a set of files matching a particular rule (or file extension) by using regular expressions.
-    - For Example: To search for all files with a file extension of `mp4` for example, you'd do `sfn ".+?\.mp4"` or some other variant of that.
-
 # For Mac Users
 Sorry, you'll have to compile to program yourself! You'd get bombarded with unidentified developer warnings otherwise which is probably more annoying than the build process itself, but hey, the source is right here.
 
