@@ -52,7 +52,7 @@ fn main() {
     let mut stdout = stdout();
 
     for dir in folders {
-        files.append(&mut util::scan_paths_recursively(&dir, &mut stdout));
+        files.append(&mut util::scan_paths_recursively(dir, &mut stdout));
     }
 
     util::finish_status(stdout, "Finished gathering paths.");
@@ -120,7 +120,7 @@ fn main() {
     }
 
     if writes_to_log_file {
-        if output == "" {
+        if output.is_empty() {
             output = String::from("No duplicate paths found.");
         }
 
