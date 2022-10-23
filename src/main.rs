@@ -5,7 +5,7 @@ use std::fs;
 use std::io::stdout;
 
 use clap::{App, Arg};
-use crossterm::style::Colorize;
+use crossterm::style::Stylize;
 use indicatif::ProgressBar;
 
 mod util;
@@ -25,19 +25,19 @@ fn main() {
         )
         .arg(
             Arg::with_name("exclude_uniques")
-                .short("e")
+                .short('e')
                 .long("exclude-uniques")
                 .help("Exclude unique files, only show files with two or more associated paths."),
         )
         .arg(
             Arg::with_name("writes_to_log_file")
-                .short("l")
+                .short('l')
                 .long("log")
                 .help("Writes all output to a file instead of the console."),
         )
         .arg(
             Arg::with_name("output_file")
-                .short("o")
+                .short('o')
                 .long("out")
                 .takes_value(true)
                 .help("Specifies the log file used if --log is enabled."),
